@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;900&family=Jua&family=Outfit:wght@400;600;800;900&display=swap');
+
+:root {
+  /* 테마 컬러 팔레트: 생동감 있는 아케이드 카툰 스타일 */
+  --color-grass-dark: #15803d;
+  --color-grass-mid: #22c55e;
+  --color-grass-light: #4ade80;
+  --color-dirt-dark: #3b1d11;
+  --color-dirt-mid: #6c3b1e;
+  --color-dirt-light: #8a4b27;
+
+  --color-wood-dark: #451a03;
+  --color-wood-mid: #78350f;
+  --color-wood-light: #b45309;
+
+  --color-gold: #facc15;
+  --color-gold-glow: #fef08a;
+  --color-gold-dark: #ca8a04;
+
+  --color-danger: #ef4444;
+  --color-danger-dark: #991b1b;
+  --color-accent: #38bdf8;
+  --color-purple: #9333ea;
+
+  --color-bg-overlay: rgba(15, 23, 42, 0.78);
+  --color-card-bg: rgba(30, 41, 59, 0.94);
+
+  /* 폰트 */
+  --font-main: 'Fredoka', 'Jua', 'Outfit', sans-serif;
+  --font-arcade: 'Jua', 'Fredoka', sans-serif;
+
+  /* 그림자 */
+  --shadow-cartoon: 0 8px 0 rgba(0, 0, 0, 0.28);
+  --shadow-glow-gold: 0 0 25px rgba(250, 204, 21, 0.55);
+  --shadow-glow-boss: 0 0 30px rgba(239, 68, 68, 0.65);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #2e7d32, #1b4d21 65%, #0d2811 100%);
+  font-family: var(--font-main);
+  color: #ffffff;
+  touch-action: manipulation;
+}
+
+/* 마우스 커서 설정: 버튼과 모달은 항상 포인터 표시 */
+button, .cartoon-btn, .hud-mini-btn, .augment-card, .shop-item-card, input, select {
+  cursor: pointer !important;
+}
+
+/* 게임 보드 영역에서만 망치 전용으로 커서 숨김 */
+.board-container, .board-hole {
+  cursor: none;
+}
+
+/* 화면 컨테이너 */
+#app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* 공통 화면 레이아웃 */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+
+.screen.hidden {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 공통 버튼 디자인: 3D 카툰 버튼 */
+.cartoon-btn {
+  font-family: var(--font-arcade);
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 0.75rem 1.8rem;
+  border-radius: 9999px;
+  border: 3px solid #ffffff;
+  color: #ffffff;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #facc15 0%, #eab308 50%, #ca8a04 100%);
+  color: #451a03;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  border-color: #fef08a;
+  box-shadow: 0 6px 0 #854d0e, 0 10px 15px rgba(0, 0, 0, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 8px 0 #854d0e, 0 12px 18px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #854d0e, 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary {
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  border-color: #bae6fd;
+  box-shadow: 0 5px 0 #0369a1, 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn-secondary:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #0369a1;
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
+  border-color: #fecaca;
+  box-shadow: 0 5px 0 #991b1b, 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-danger:hover {
+  filter: brightness(1.1);
+}
+
+.btn-wood {
+  background: linear-gradient(180deg, #b45309 0%, #78350f 100%);
+  border-color: #fde68a;
+  box-shadow: 0 5px 0 #451a03, 0 8px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--color-bg-overlay);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-content {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border: 4px solid #facc15;
+  border-radius: 28px;
+  padding: 2rem;
+  max-width: 680px;
+  width: 92%;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 30px rgba(250, 204, 21, 0.3);
+  text-align: center;
+  position: relative;
+}
+
+.modal-title {
+  font-family: var(--font-arcade);
+  font-size: 2rem;
+  color: #facc15;
+  margin-bottom: 1rem;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* 스크롤바 커스텀 */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
