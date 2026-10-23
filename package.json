@@ -1,0 +1,19 @@
+{
+  "name": "whack-a-mole-roguelike",
+  "version": "1.0.0",
+  "description": "두더지 대작전! (Whack-a-Mole Roguelike) - 로그라이크 아케이드 두더지 잡기 게임",
+  "main": "index.html",
+  "scripts": {
+    "start": "node build.js && node server.js",
+    "dev": "node build.js && node server.js",
+    "build": "node build.js"
+  },
+  "keywords": [
+    "game",
+    "whack-a-mole",
+    "roguelike",
+    "arcade"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}

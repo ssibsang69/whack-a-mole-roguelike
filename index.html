@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>두더지 대작전! - 로그라이크 아케이드 두더지 잡기 게임</title>
+  <meta name="description" content="두더지를 잡고 15종의 증강과 시너지를 조합하여 강력한 보스를 공략하는 고품질 브라우저 로그라이크 아케이드 두더지 잡기 게임!">
+  <meta name="keywords" content="두더지 잡기, 게임, 로그라이크, 아케이드, 브라우저 게임, whack-a-mole">
+
+  <!-- 스타일시트 로드 -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/game.css">
+  <link rel="stylesheet" href="styles/ui.css">
+</head>
+<body class="in-game">
+  <div id="app-container">
+
+    <!-- 1. 시작 화면 -->
+    <main id="screen-start" class="screen">
+      <div class="start-screen-card">
+        <header>
+          <h1 class="game-title">두더지 대작전!</h1>
+          <p class="game-subtitle">Whack-a-Mole Roguelike Arcade</p>
+        </header>
+
+        <div class="start-stats-grid">
+          <div class="stat-item">
+            <div class="stat-title">최고 점수</div>
+            <div class="stat-num" id="start-high-score">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-title">최대 콤보</div>
+            <div class="stat-num" id="start-max-combo">0</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-title">총 처치 수</div>
+            <div class="stat-num" id="start-total-kills">0</div>
+          </div>
+        </div>
+
+        <div class="start-buttons-group">
+          <button id="btn-play-game" class="cartoon-btn btn-primary" style="font-size: 1.6rem; padding: 1rem 3rem;">
+            🔨 게임 시작!
+          </button>
+
+          <div class="start-sub-actions">
+            <button class="cartoon-btn btn-secondary btn-achievements">🏆 업적</button>
+            <button class="cartoon-btn btn-secondary btn-rules">📖 게임 방법</button>
+            <button class="cartoon-btn btn-secondary btn-settings">⚙️ 설정</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 2. 인게임 플레이 화면 -->
+    <section id="screen-game" class="screen hidden">
+      <!-- 상단 HUD 영역 -->
+      <header class="game-hud">
+        <div class="hud-top-row">
+          <div class="hud-stat-box">
+            <span class="hud-label">점수</span>
+            <span class="hud-val score" id="hud-score">0</span>
+          </div>
+          <div class="hud-stat-box">
+            <span class="hud-label">웨이브</span>
+            <span class="hud-val wave" id="hud-wave">WAVE 1</span>
+          </div>
+          <div class="hud-stat-box">
+            <span class="hud-label">남은 시간</span>
+            <span class="hud-val time" id="hud-time">30</span>
+          </div>
+          <div class="hud-stat-box">
+            <span class="hud-label">코인</span>
+            <span class="hud-val coins"><span id="hud-coins">0</span> 🪙</span>
+          </div>
+
+          <div class="hud-actions">
+            <button id="btn-open-shop" class="hud-mini-btn" title="상점 열기">🛒 상점</button>
+            <button id="btn-toggle-sfx" class="hud-mini-btn" title="효과음 토글">🔊 SFX</button>
+            <button id="btn-toggle-bgm" class="hud-mini-btn" title="BGM 토글">🎵 BGM</button>
+          </div>
+        </div>
+
+        <!-- 콤보 게이지 & 증강 진행 바 -->
+        <div class="hud-secondary-row">
+          <div class="combo-container">
+            <span class="combo-text" id="hud-combo-count">0 COMBO!</span>
+            <div class="combo-bar-track">
+              <div class="combo-bar-fill" id="hud-combo-bar"></div>
+            </div>
+            <span class="combo-multiplier" id="hud-combo-multiplier">1.0x</span>
+            <span id="hud-shields" style="font-size: 0.9rem; font-weight: 800; color: #38bdf8; margin-left: 0.4rem;">🛡️ x0</span>
+          </div>
+
+          <div class="augment-gauge-container">
+            <span class="augment-gauge-label">증강 해금</span>
+            <div class="augment-gauge-track">
+              <div class="augment-gauge-fill" id="hud-augment-progress"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 보스전 전용 HUD 바 (보스전에만 표시) -->
+        <div id="boss-hud" class="boss-hud-bar hidden">
+          <div class="boss-hud-header">
+            <span class="boss-name" id="boss-name">두더지 대왕</span>
+            <span class="boss-timer" id="boss-timer">⏱️ 30초</span>
+          </div>
+          <div class="boss-hp-track">
+            <div class="boss-hp-fill" id="boss-hp-fill"></div>
+            <div class="boss-hp-text" id="boss-hp-text">16 / 16</div>
+          </div>
+          <div class="boss-status-text" id="boss-status-text">약점을 노려 타격하세요!</div>
+        </div>
+      </header>
+
+      <!-- 중앙 두더지 필드 보드 -->
+      <div class="board-container">
+        <div id="game-board" class="game-board grid-3x3">
+          <!-- 동적으로 생성되는 3D 두더지 구멍들 -->
+        </div>
+      </div>
+
+      <!-- 하단 활성 증강 & 시너지 선반 -->
+      <footer class="bottom-bar">
+        <div class="augments-shelf">
+          <span class="shelf-label">보유 증강:</span>
+          <div id="active-augments-list" style="display: flex; gap: 0.3rem; flex-wrap: wrap;"></div>
+        </div>
+        <div class="synergies-shelf">
+          <span class="shelf-label">발동 시너지:</span>
+          <div id="active-synergies-list" style="display: flex; gap: 0.3rem; flex-wrap: wrap;"></div>
+        </div>
+      </footer>
+    </section>
+
+    <!-- 3. 결과 및 통계 화면 -->
+    <section id="screen-result" class="screen hidden">
+      <div class="result-card">
+        <h2 id="result-title" class="modal-title">결과</h2>
+        <div id="result-is-high-score" class="high-score-badge hidden">🏆 새로운 최고 점수 달성! 🏆</div>
+
+        <div class="result-stats-table">
+          <div class="result-row">
+            <span>최종 점수</span>
+            <strong id="result-score">0</strong>
+          </div>
+          <div class="result-row">
+            <span>총 처치 수</span>
+            <strong id="result-kills">0</strong>
+          </div>
+          <div class="result-row">
+            <span>최고 콤보</span>
+            <strong id="result-max-combo">0</strong>
+          </div>
+          <div class="result-row">
+            <span>명중률</span>
+            <strong id="result-accuracy">100%</strong>
+          </div>
+          <div class="result-row">
+            <span>획득 코인</span>
+            <strong id="result-coins">0</strong>
+          </div>
+          <div class="result-row">
+            <span>처치한 보스</span>
+            <strong id="result-boss-kills">0</strong>
+          </div>
+        </div>
+
+        <div style="width: 100%; text-align: left;">
+          <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.4rem; font-weight: 700;">완성한 증강 빌드:</div>
+          <div id="result-augments-summary" class="result-aug-list"></div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+          <button id="btn-restart" class="cartoon-btn btn-primary">🔨 다시 하기</button>
+          <button id="btn-home" class="cartoon-btn btn-wood">🏠 시작 화면으로</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- === 모달창들 === -->
+
+    <!-- A. 증강 선택 모달 (일반 두더지 15마리 처치 시) -->
+    <div id="modal-augment" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2 class="modal-title">✨ 증강 선택 (Roguelike Upgrade)</h2>
+        <p style="color: #cbd5e1; font-size: 0.95rem;">당신의 빌드를 강화할 증강 3개 중 하나를 선택하세요!</p>
+        <div id="augment-cards-container" class="cards-grid">
+          <!-- 증강 카드 동적 렌더링 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- B. 보스 처치 특별 전설 보상 모달 -->
+    <div id="modal-boss-reward" class="modal-overlay hidden">
+      <div class="modal-content" style="border-color: #facc15;">
+        <h2 id="boss-reward-title" class="modal-title">🏆 보스 토벌 성공!</h2>
+        <p id="boss-reward-bonus" style="font-size: 1.1rem; color: #fde047; font-weight: 800; margin-bottom: 0.5rem;"></p>
+        <p style="color: #cbd5e1; font-size: 0.95rem;">보스 전용 전설 증강 중 하나를 선택하세요!</p>
+        <div id="boss-reward-cards-container" class="cards-grid">
+          <!-- 전설 증강 카드 동적 렌더링 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- C. 보스 도주 (실패) 요약 모달 -->
+    <div id="modal-boss-fled" class="modal-overlay hidden">
+      <div class="modal-content" style="border-color: #f97316;">
+        <h2 id="boss-fled-title" class="modal-title">💨 보스가 도망쳤습니다!</h2>
+        <div id="boss-fled-stats" style="font-size: 1rem; color: #cbd5e1; line-height: 1.6; margin: 1.2rem 0;"></div>
+        <button id="btn-boss-fled-continue" class="cartoon-btn btn-primary">다음 웨이브로 계속하기</button>
+      </div>
+    </div>
+
+    <!-- D. 인게임 코인 상점 모달 -->
+    <div id="modal-shop" class="modal-overlay hidden">
+      <div class="modal-content" style="border-color: #10b981;">
+        <h2 class="modal-title">🛒 두더지 비밀 상점</h2>
+        <p style="color: #cbd5e1; font-size: 0.95rem;">보유 코인: <strong id="shop-current-coins" style="color: #facc15; font-size: 1.2rem;">0</strong> 🪙</p>
+        <div id="shop-items-list" class="shop-items-container">
+          <!-- 상점 아이템 동적 렌더링 -->
+        </div>
+        <button id="btn-close-shop" class="cartoon-btn btn-wood">닫기</button>
+      </div>
+    </div>
+
+    <!-- E. 업적 모달 -->
+    <div id="modal-achievements" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2 class="modal-title">🏆 도전 과제 & 업적</h2>
+        <p id="achievements-counter" style="color: #facc15; font-weight: 800; margin-bottom: 0.5rem;">0 / 12 달성</p>
+        <div id="achievements-list" class="achievements-grid"></div>
+        <button id="btn-close-achievements" class="cartoon-btn btn-wood">닫기</button>
+      </div>
+    </div>
+
+    <!-- F. 게임 방법 / 규칙 모달 -->
+    <div id="modal-guide" class="modal-overlay hidden">
+      <div class="modal-content" style="text-align: left;">
+        <h2 class="modal-title" style="text-align: center;">📖 게임 방법</h2>
+        <div style="color: #cbd5e1; font-size: 0.92rem; line-height: 1.7; display: flex; flex-direction: column; gap: 0.8rem;">
+          <p><strong>1. 기본 조작:</strong> 마우스 클릭 또는 모바일 터치로 두더지를 잡습니다. 데스크톱에서는 <strong>1~9 숫자키</strong> 또는 <strong>QWE/ASD/ZXC</strong>로 각 구멍을 직접 타격할 수 있습니다!</p>
+          <p><strong>2. 두더지 종류:</strong>
+            <br>• <strong>일반 두더지</strong>: 100점 획득. 15마리 처치 시마다 증강 선택지가 열립니다.
+            <br>• <strong>황금 두더지</strong>: 높은 점수와 풍부한 코인을 제공합니다.
+            <br>• <strong>폭탄 두더지</strong>: 클릭 시 200점 차감 및 콤보가 초기화됩니다!
+          </p>
+          <p><strong>3. 콤보 & 증강 조합:</strong> 연속으로 잡으면 콤보가 올라 점수 배율이 증가합니다. 15가지 기본 증강을 최대 3단계까지 강화하고 특수 시너지를 완성해 보세요!</p>
+          <p><strong>4. 보스전:</strong> 3웨이브(두더지 대왕), 6웨이브(철갑 두더지), 9웨이브(마왕 두더지)에 출현합니다. 약점 노출 순간을 집중 타격하세요. 30초 내에 처치하지 못하면 보스가 도망치지만 게임은 계속됩니다!</p>
+        </div>
+        <div style="text-align: center; margin-top: 1.2rem;">
+          <button id="btn-close-guide" class="cartoon-btn btn-wood">이해했습니다!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- G. 설정 모달 -->
+    <div id="modal-settings" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h2 class="modal-title">⚙️ 게임 설정</h2>
+        <div class="settings-form">
+          <label class="setting-row">
+            <span>효과음 (SFX)</span>
+            <input type="checkbox" id="setting-sfx" checked>
+          </label>
+          <label class="setting-row">
+            <span>배경음악 (BGM)</span>
+            <input type="checkbox" id="setting-bgm" checked>
+          </label>
+          <label class="setting-row">
+            <span>키보드 단축키 안내 표시 (1~9)</span>
+            <input type="checkbox" id="setting-key-guide" checked>
+          </label>
+          <label class="setting-row">
+            <span>필드 크기 (Grid Size)</span>
+            <select id="setting-field-size">
+              <option value="3">3 x 3 (기본 9개 구멍)</option>
+              <option value="4">4 x 4 (확장 16개 구멍)</option>
+            </select>
+          </label>
+          <div style="margin-top: 0.5rem; text-align: center;">
+            <button id="btn-reset-data" class="cartoon-btn btn-danger" style="font-size: 0.95rem; padding: 0.5rem 1.2rem;">
+              🗑️ 모든 기록 및 업적 초기화
+            </button>
+          </div>
+        </div>
+        <button id="btn-close-settings" class="cartoon-btn btn-wood">완료</button>
+      </div>
+    </div>
+
+    <!-- 플로팅 연출 레이어 -->
+    <div id="screen-alert" class="hidden"></div>
+    <div id="countdown-display" class="hidden"></div>
+    <div id="floating-container"></div>
+    <div id="custom-hammer"></div>
+
+  </div>
+
+  <!-- 메인 스크립트 로드: bundle.js로 file:// 및 http:// 환경 완벽 지원 -->
+  <script defer src="bundle.js"></script>
+</body>
+</html>
